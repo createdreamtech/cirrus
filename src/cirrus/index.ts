@@ -1,5 +1,6 @@
 import * as datalog from '@createdreamtech/datalog'
 import { Actions } from '../actions'
+import { SerializedAction } from '../serialize';
 import {Storage, RemoteStorage} from "../storage/storage"
 //NOTE tableName is not globally unique you may want to make a globally unique table name when joining facts across appKeys
 
@@ -122,6 +123,10 @@ export class Cirrus{
             const actions = await this.storage.getForeign(entry.appKey, entry.pubKey)      
             await this.play(actions)
         } 
+    }
+
+    async saveOnly(filter:(f:Actions)=>boolean){
+        return this.storage.flush(filter)
     }
 
     async save() {

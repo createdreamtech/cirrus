@@ -41,9 +41,13 @@ export class SkyDBStorage implements Storage, RemoteStorage {
     }
 
     //write data to disk
-    async flush(): Promise<void> {
+    async flush(filterActions?:(x:Actions)=>boolean): Promise<void> {
         const actions = await this.cache.get()
-        const serializedActions = actions.map(serialize.actionToJSON.bind(this))
+        let filtered = actions;
+        if(filterActions !== undefined){
+            filtered = actions.filter(filterActions)
+        }
+        const serializedActions = filtered.map(serialize.actionToJSON.bind(this))
         return this.skynetClient.db.setJSON(this.secret, this.appKey, serializedActions).catch((e:Error)=>console.error(e))
     }
     origin(): string {

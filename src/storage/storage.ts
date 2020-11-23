@@ -8,7 +8,7 @@ export interface Storage {
     clear(): Promise<void>
 
     // Not all storage will or can use this but it allows for the user to have more granular control over writing to permanent storage
-    flush(): Promise<void>
+    flush( filter?:(x:Actions)=>boolean): Promise<void>
 
     origin(): string
 
