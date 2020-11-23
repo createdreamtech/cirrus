@@ -124,15 +124,15 @@ export class Cirrus{
        // reset the table lookup 
     }
 
-    save() {
-        this.storage.flush()
+    async save() {
+        return this.storage.flush()
     }
 
     
     async add(appKey: string, pubKey: string) {
         this.foreignKeys.push({appKey, pubKey});
         const actions = await this.storage.getForeign(appKey, pubKey)
-        this.play(actions)
+        return this.play(actions)
     }
 
     rm() {

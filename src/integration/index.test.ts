@@ -2,7 +2,7 @@ import * as datalog from '@datalogui/datalog';
 import * as serialize from "../serialize"
 import { Cirrus } from "../cirrus";
 import { MemoryStorage } from "../storage/memory";
-import { Storage, RemoteStorage } from "../storage"
+import { Storage, RemoteStorage, SkyDBStorage } from "../storage"
 type RemoteStore = Storage & RemoteStorage;
 async function testStore(appKey: string, store1: RemoteStore, store2: RemoteStore): Promise<void> {
     describe("integration test that demonstrates query engine working against storage", () => {
@@ -57,8 +57,8 @@ async function testStore(appKey: string, store1: RemoteStore, store2: RemoteStor
                 PeopleTableDB1({ id: parentID, name: parentName })
             })
             let result = q1.view().readAllData();
-            expect(result.length === 2)
-            expect(result.map((r)=>r.parentName).sort() === ["Janice", "Tom"])
+            expect(result.length === 2).toBe(true)
+            expect(result.map((r)=>r.parentName).sort()[0] === "Janice").toBe(true)
 
             const q2 = datalog.query<{ parentName: string, parentID: number, childID: number }>(({ parentName, parentID, childID }) => {
                 PeopleTableDB2({ name: "Trip", id: childID })
@@ -66,26 +66,54 @@ async function testStore(appKey: string, store1: RemoteStore, store2: RemoteStor
                 PeopleTableDB2({ id: parentID, name: parentName })
             })
             result = q2.view().readAllData()
-            expect(result.length === 1)
-            expect(result.map((r)=>r.parentName).sort() === ["John"])
+            expect(result.length === 1).toBe(true)
+            expect(result.map((r)=>r.parentName)[0] === "John").toBe(true)
+            try{
+            await db1.save()
+            await db2.save()
+            }catch(e){
+                console.log(e)
+            }
 
             // So let's find all the parents across databases by subscribing to another dataset and querying
             if(store1 instanceof MemoryStorage && store2 instanceof MemoryStorage){
                 //because it's memory storage we need a way to retrieve the data in this case we do a little
                 // manual linking of the data set
-                store1.addRemote(store2) // this simply alows us to call getForeign with the appropriate data
+                await store1.addRemote(store2) // this simply alows us to call getForeign with the appropriate data
             }
             // we just specifiy the application key, diregarded for in memory usage 
-             db1.add(appKey,store2.origin())
-             let q = datalog.query<{ parentName: string, parentID: number, childID: number }>(({ parentName, parentID, childID }) => {
+             await db1.add(appKey,store2.origin())
+             let q = datalog.query<{ parentName: string, parentID: number, childID: number }>(({ parentName, parentID, childID}) => {
                 PeopleTableDB1({ name: "Trip", id: childID })
                 ParentTableDB1({ childID, parentID })
                 PeopleTableDB1({ id: parentID, name: parentName })
             })
             result = q.view().readAllData()
-            expect(result.length === 1)
-            expect(result.map((r)=>r.parentName).sort() === ["John"])
+            console.log(result)
+            expect(result.length === 1).toBe(true)
+            expect(result.map((r)=>r.parentName).sort()[0] === "John").toBe(true)
+            try{
+            await db1.save()
+            }catch(e){
+                console.log(e)
+            }
+            await db2.save()
+            db1.refresh()
+
+           q = datalog.query<{ parentName: string, parentID: number, childID: number }>(({ parentName, parentID, childID }) => {
+                PeopleTableDB1({ name: "Trip", id: childID })
+                ParentTableDB1({ childID, parentID })
+                PeopleTableDB1({ id: parentID, name: parentName })
+            })
+            result = q.view().readAllData()
+            console.log(result)
+            expect(result.length === 1).toBe(true)
+            expect(result.map((r)=>r.parentName)[0] === "John").toBe(true) 
+
         })
     })
 }
-testStore("parents", new MemoryStorage("pubkey1"), new MemoryStorage("pubkey2"))
+//testStore("parents", new MemoryStorage("pubkey1"), new MemoryStorage("pubkey2"))
+const secret1 = "19181918"
+const secret2 = "19181918"
+testStore("mypawpaw",new SkyDBStorage(secret1,"mypawpaw"), new SkyDBStorage(secret2, "mypawpaw") )
