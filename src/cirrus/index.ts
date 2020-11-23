@@ -1,6 +1,6 @@
 import * as datalog from '@datalogui/datalog'
 import { Actions } from '../actions'
-import {Storage} from "../storage/storage"
+import {Storage, RemoteStorage} from "../storage/storage"
 //NOTE tableName is not globally unique you may want to make a globally unique table name when joining facts across appKeys
 
 interface CirrusLookupTable{
@@ -15,16 +15,25 @@ export interface CirrusMetadata {
     __origin?: string
 }
 
+interface ForeignKeys {
+    appKey: string,
+    pubKey: string
+}
+
 export class Cirrus{
 
-    storage:Storage
+    storage:Storage & RemoteStorage
     tableLookup: CirrusLookupTable;
+
+    //external pubKeys for databases to read
+    foreignKeys: Array<ForeignKeys>;
     defaultOrigin: string;
     
-    constructor(storage: Storage, defaultOrigin: string){
+    constructor(storage: Storage & RemoteStorage, defaultOrigin: string){
         this.storage = storage
         this.tableLookup = {}
         this.defaultOrigin = defaultOrigin;
+        this.foreignKeys =[]
     }
 
 
@@ -89,23 +98,41 @@ export class Cirrus{
     }
 
     async init() {
-       const actions = await this.storage.get()         
+        const actions = await this.storage.get()         
        // reset the table lookup 
-       this.tableLookup = {}
-       await this.storage.clear()
-       this.play(actions)
+        this.tableLookup = {}
+        this.storage.clear()    
+        return this.play(actions)
     }
 
-    refresh() {
-        
+    //TODO speed this up
+    async refresh() {
+        // clear any lookup data
+        this.tableLookup = {}
+        // clear any cache
+        this.storage.clear()    
+        const actions = await this.storage.get()         
+        const acts = actions.filter((action)=> action.__origin === this.defaultOrigin)
+        //refresh your own actions first 
+        await this.play(acts)
+
+        // go forth and grab external actions
+        for( const entry of this.foreignKeys){
+            const actions = await this.storage.getForeign(entry.appKey, entry.pubKey)      
+            await this.play(actions)
+        } 
+       // reset the table lookup 
     }
 
     save() {
         this.storage.flush()
     }
 
-    add() {
-        this.refresh()
+    
+    async add(appKey: string, pubKey: string) {
+        this.foreignKeys.push({appKey, pubKey});
+        const actions = await this.storage.getForeign(appKey, pubKey)
+        this.play(actions)
     }
 
     rm() {
