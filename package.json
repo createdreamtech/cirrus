@@ -7,7 +7,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc && typedoc --out docs &&  touch docs/.nojekyll ",
+    "build": "tsc",
     "lint": "eslint -c .eslintrc.js --ext .ts",
     "test": "npm run lint && jest --coverage"
   },
@@ -24,5 +24,10 @@
     "tslint": "^5.18.0",
     "typedoc": "^0.19.2",
     "typescript": "^4.0.0"
+  },
+  "dependencies": {
+    "@datalogui/datalog": "file:datalogui-datalog-0.0.10.tgz",
+    "graphql": "^15.4.0",
+    "skynet-js": "^2.9.0"
   }
 }
