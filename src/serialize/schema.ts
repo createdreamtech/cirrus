@@ -1,5 +1,5 @@
-import type { TableSchema, TypeValidator } from "@datalogui/datalog";
-import * as datalog from "@datalogui/datalog";
+import type { TableSchema, TypeValidator } from "@createdreamtech/datalog";
+import * as datalog from "@createdreamtech/datalog";
 
 //assumes single level data 
 

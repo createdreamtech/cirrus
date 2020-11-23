@@ -1,4 +1,4 @@
-import * as datalog from '@datalogui/datalog'
+import * as datalog from '@createdreamtech/datalog'
 import { Actions } from '../actions'
 import {Storage, RemoteStorage} from "../storage/storage"
 //NOTE tableName is not globally unique you may want to make a globally unique table name when joining facts across appKeys

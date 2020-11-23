@@ -1,4 +1,4 @@
-import * as datalog from '@datalogui/datalog';
+import * as datalog from '@createdreamtech/datalog';
 import * as serialize from "../serialize"
 import { Cirrus } from "../cirrus";
 import { MemoryStorage } from "../storage/memory";
@@ -92,6 +92,7 @@ async function testStore(appKey: string, store1: RemoteStore, store2: RemoteStor
             console.log(result)
             expect(result.length === 1).toBe(true)
             expect(result.map((r)=>r.parentName).sort()[0] === "John").toBe(true)
+            
             try{
             await db1.save()
             }catch(e){

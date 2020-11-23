@@ -1,5 +1,5 @@
 {
-  "name": "@etclabscore/pristine-typescript",
+  "name": "@createdreamtech/cirrus",
   "version": "0.0.0-development",
   "description": "",
   "main": "build/index.js",
@@ -26,8 +26,7 @@
     "typescript": "^4.0.0"
   },
   "dependencies": {
-    "@datalogui/datalog": "file:datalogui-datalog-0.0.10.tgz",
-    "graphql": "^15.4.0",
+    "@createdreamtech/datalog": "0.0.1",
     "skynet-js": "^2.9.0"
   }
 }
