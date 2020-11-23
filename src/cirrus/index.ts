@@ -108,10 +108,11 @@ export class Cirrus{
     //TODO speed this up
     async refresh() {
         // clear any lookup data
+        const actions = await this.storage.get()         
+       // reset the table lookup 
         this.tableLookup = {}
         // clear any cache
         this.storage.clear()    
-        const actions = await this.storage.get()         
         const acts = actions.filter((action)=> action.__origin === this.defaultOrigin)
         //refresh your own actions first 
         await this.play(acts)
@@ -121,7 +122,6 @@ export class Cirrus{
             const actions = await this.storage.getForeign(entry.appKey, entry.pubKey)      
             await this.play(actions)
         } 
-       // reset the table lookup 
     }
 
     async save() {
