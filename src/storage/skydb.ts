@@ -29,7 +29,9 @@ export class SkyDBStorage implements Storage, RemoteStorage {
         if(actions.length === 0){
             const acts = await this.getFromSource(this.appKey, this.pubKey)
             //NOTE this is safe only because we're using MemoryStorage
-            acts.forEach(this.cache.put.bind(this))
+            for ( const action of acts ) {
+                await this.put(action)
+            }
             return acts
         }
         return actions 
@@ -42,15 +44,15 @@ export class SkyDBStorage implements Storage, RemoteStorage {
     async flush(): Promise<void> {
         const actions = await this.cache.get()
         const serializedActions = actions.map(serialize.actionToJSON.bind(this))
-        return this.skynetClient.db.setJSON(this.secret, this.appKey, {data: serializedActions}).catch((e:Error)=>console.error(e))
+        return this.skynetClient.db.setJSON(this.secret, this.appKey, serializedActions).catch((e:Error)=>console.error(e))
     }
     origin(): string {
         return this.pubKey
     }
     async getFromSource(appKey: string, pubKey:string): Promise<Actions[]> {
         const entry = await this.skynetClient.db.getJSON(pubKey, appKey)
-        if(entry && entry.data && entry.data.data && Array.isArray(entry.data.data)){
-            return entry.data.data.map(serialize.actionFromJSON.bind(this))
+        if(entry && entry.data  && Array.isArray(entry.data)){
+            return entry.data.map(serialize.actionFromJSON.bind(this))
         }
         return []
     }
