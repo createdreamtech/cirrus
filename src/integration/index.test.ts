@@ -107,7 +107,6 @@ async function testStore(appKey: string, store1: RemoteStore, store2: RemoteStor
                 PeopleTableDB1({ id: parentID, name: parentName })
             })
             result = q.view().readAllData()
-            console.log(result)
             expect(result.length === 1).toBe(true)
             expect(result.map((r)=>r.parentName)[0] === "John").toBe(true) 
 
