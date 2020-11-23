@@ -21,6 +21,10 @@ export class MemoryStorage implements Storage{
             return this.storage.map(serialize.actionFromJSON);
         }
 
+    origin():string{
+        return this.pubKey
+    }
+
     async clear():Promise<void> {
         this.storage = []
     }

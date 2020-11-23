@@ -10,6 +10,8 @@ export interface Storage {
     // Not all storage will or can use this but it allows for the user to have more granular control over writing to permanent storage
     flush(): Promise<void>
 
+    origin(): string
+
 }
 
 export interface RemoteStorage {
