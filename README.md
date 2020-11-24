@@ -43,10 +43,10 @@ npm init
 npm install -g @createdreamtech/cirrus
 touch example.js
 copy pasta below int example.js
-node example.js
+compile for web
 ```
 
-Then require it into any module.
+Short Example 
 ```js
 const cirrus = require('@createdreamtech/cirrus')
 const datalog = require("@createdreamtech/datalog")
@@ -235,10 +235,12 @@ How to contribute, build and release are outlined in [CONTRIBUTING.md](CONTRIBUT
 
 Apache License 2.0
 
-## Resources
+### Caveats
+
+Experimental software and currently/ temporarily restricted to web use.
 
 
-### Special Thanks
+### Resources
 [Datalog Primer super Quick](https://x775.net/2019/03/18/Introduction-to-Datalog.html)
 [StrangeLoop about Streaming Architectures](https://www.thestrangeloop.com/2019/temporal-databases-for-streaming-architectures.html)
 [Datalog definition](https://docs.racket-lang.org/datalog/)
