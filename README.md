@@ -1,3 +1,4 @@
+# CIRRUS: A Datalog framework for writing to and querying against SkyDB
 ## Table of Contents
   - [About The Project](#about-the-project)
        - [Motivation](#Motivation)
@@ -36,12 +37,99 @@ The goal here is to build a framework, that can allow developers that use skydb 
 Install via npm package
 
 ```bash
+mkdir -p example
+cd example
+npm init
 npm install -g @createdreamtech/cirrus
+touch example.js
+copy pasta below int example.js
+node example.js
 ```
 
 Then require it into any module.
 ```js
+const cirrus = require('@createdreamtech/cirrus')
+const datalog = require("@createdreamtech/datalog")
+const {Cirrus, SkyDBStorage} = cirrus;
+//import {Cirrus, SkyDBStorage} from "@createdreamtech/cirrus";
+//import datalog from "@createdreamtech/datalog";
+(async function(){
+const PeopleSchema = {
+    id: datalog.NumberType,
+    name: datalog.StringType,
+}
+const ParentSchema = {
+    parentId: datalog.NumberType,
+    childId: datalog.NumberType
+}
 
+const appKey = "my-ancestry-clone-dot-com"
+const secret = `cirrus-seed-${Math.random()}`
+
+const storage = new SkyDBStorage(secret, appKey)
+const pubKey=storage.origin()
+console.log(`my pubKey: ${storage.origin()}`)
+const db = new Cirrus(storage,storage.origin())
+await db.init()
+const People = await db.newTable("People",PeopleSchema)
+const ParentOf = await db.newTable("ParentOf", ParentSchema)
+
+People.asserts({id: 1, name: "Jane"})
+People.asserts({id: 2, name: "Joan"})
+People.asserts({id: 10, name: "Jackie"})
+People.asserts({id: 12, name: "Johnne"})
+People.asserts({id: 22, name: "Grandpa Jones"})
+People.asserts({id: 20, name: "Grandma Jones"})
+
+ParentOf.asserts({parentId:10,childId:1})
+ParentOf.asserts({parentId:12,childId:2})
+ParentOf.asserts({parentId:12,childId:1})
+ParentOf.asserts({parentId:22,childId:12})
+ParentOf.asserts({parentId:20,childId:10})
+//saves all data even data from remote dbs 
+// await db.save();
+
+//save only actions related to your database (asserts/retractions)
+await db.saveOnly((action)=>{action.__origin === pubKey})
+
+//Parents of Jane
+const qq = datalog.query(({id, parentId})=> {
+    People({id,name:"Jane"})
+    ParentOf({parentId,childId:id})
+})
+console.log(qq.view().readAllData())
+
+const qqq = datalog.query(({id, name, parentId})=> {
+    People({id,name:"Jane"})
+    ParentOf({parentId,childId:id})
+    People({id:parentId,name})
+})
+console.log(qqq.view().readAllData())
+
+
+
+//Grandparents 
+//Good explantion of how this works out https://x775.net/2019/03/18/Introduction-to-Datalog.html
+const q = datalog.query(({name,id, parentId, childId})=> {
+    People({id,name})
+    ParentOf({parentId:id,childId})
+    ParentOf({parentId:childId,childId:parentId})
+})
+console.log(q.view().readAllData())
+})();
+```
+outputs
+```sh
+[ { id: 1, parentId: 10 }, { id: 1, parentId: 12 } ]
+[
+  { id: 1, parentId: 10, name: 'Jackie' },
+  { id: 1, parentId: 12, name: 'Johnne' }
+]
+[
+  { id: 20, name: 'Grandma Jones', childId: 10, parentId: 1 },
+  { id: 22, name: 'Grandpa Jones', childId: 12, parentId: 1 },
+  { id: 22, name: 'Grandpa Jones', childId: 12, parentId: 2 }
+]
 ```
 ## Examples
 [Live React Example](https://siasky.net/EABO8WM06s4wSBbEeB2ssBtV7sxQL1qnpE-3d_yoZAxxhg/)
