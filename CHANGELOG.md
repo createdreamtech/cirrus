@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/createdreamtech/cirrus/compare/1.0.0...1.0.1) (2020-11-24)
+
+
+### Bug Fixes
+
+* package.json entry point ([00c8bb7](https://github.com/createdreamtech/cirrus/commit/00c8bb763956a0676b842be6842c4cdb81529aaa))
+
 # 1.0.0 (2020-11-23)
 
 
